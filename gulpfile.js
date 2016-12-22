@@ -1,10 +1,10 @@
-var del = require('del');
-var gulp = require('gulp');
-var babel = require('gulp-babel');
-var sourcemaps = require('gulp-sourcemaps');
-var nodemon = require('gulp-nodemon');
-var livereload = require('gulp-livereload');
-var eslint = require('gulp-eslint');
+const del = require('del');
+const gulp = require('gulp');
+const babel = require('gulp-babel');
+const sourcemaps = require('gulp-sourcemaps');
+const nodemon = require('gulp-nodemon');
+const livereload = require('gulp-livereload');
+const eslint = require('gulp-eslint');
 
 gulp.task('lint', () => {
 	return gulp.src('src/**/*.js')
