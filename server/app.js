@@ -8,22 +8,12 @@ import bodyParser from 'body-parser';
 import index from './routes/index';
 import users from './routes/users';
 
-// var express = require('express');
-// var path = require('path');
-// var favicon = require('serve-favicon');
-// var logger = require('morgan');
-// var cookieParser = require('cookie-parser');
-// var bodyParser = require('body-parser');
-
-// var index = require('./routes/index');
-// var users = require('./routes/users');
-
 let app = express();
 let rootDir = __dirname + '/..';
 
 // view engine setup
-app.set('views', path.join(rootDir, 'views'));
-app.set('view engine', 'jade');
+app.set('views', path.join(rootDir, '../views'));
+app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public 
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -31,7 +21,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(rootDir, 'public')));
+app.use(express.static(path.join(rootDir, 'web-client')));
 
 app.use('/', index);
 app.use('/users', users);

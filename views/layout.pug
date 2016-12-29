@@ -1,0 +1,14 @@
+doctype html
+html
+  head
+    title= title
+    meta(charset='utf-8')
+    meta(name='viewpoint', content='width=device-width, initial-scale=1')
+    base(href='/')
+    link(rel='stylesheet', href='styles.bundle.css')
+  body
+    block content
+    app-root= 'Loading...'
+    script(type='text/javascript', src='inline.bundle.js')
+    script(type='text/javascript', src='vendor.bundle.js')
+    script(type='text/javascript', src='main.bundle.js')
