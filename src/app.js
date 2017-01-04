@@ -4,10 +4,7 @@ import favicon from 'serve-favicon';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-
-import index from './routes/index';
-import users from './routes/users';
-import auth from './routes/auth';
+import RouterProvider from './router';
 
 let app = express();
 let rootDir = __dirname + '/..';
@@ -23,13 +20,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(rootDir, 'public')));
-app.use(dump);
-app.use(protagonist);
+// app.use(dump);
+// app.use(protagonist);
+
+app.use('/', RouterProvider);
 
 
-app.use('/', index);
-app.use('/users', users);
-app.use('/auth', auth);
 
 
 

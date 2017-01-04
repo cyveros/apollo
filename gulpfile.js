@@ -28,7 +28,7 @@ gulp.task('build:server', ['clean:server'], () => {
 			presets: ['es2015']
 		}))
 		.pipe(sourcemaps.write('.'))
-		.pipe(gulp.dest('dist/'));
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('build', ['build:server']);
