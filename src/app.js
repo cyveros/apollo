@@ -4,6 +4,8 @@ import favicon from 'serve-favicon';
 import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+
 import RouterProvider from './router';
 
 let app = express();
@@ -20,14 +22,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(rootDir, 'public')));
+
+app.use(cors());
 // app.use(dump);
 // app.use(protagonist);
 
 app.use('/', RouterProvider);
-
-
-
-
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

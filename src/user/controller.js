@@ -4,7 +4,8 @@ class Controller
 {
 	static getUser(req, res, next)
 	{
-		res.render('auth/index', { title: 'Express auth' });
+		res.json(req.user);
+		
 	}
 
 	static createUser(req, res, next)
