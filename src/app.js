@@ -7,12 +7,13 @@ import bodyParser from 'body-parser';
 
 import index from './routes/index';
 import users from './routes/users';
+import auth from './routes/auth';
 
 let app = express();
 let rootDir = __dirname + '/..';
 
 // view engine setup
-app.set('views', path.join(rootDir, '../views'));
+app.set('views', path.join(rootDir, '/views'));
 app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public 
@@ -21,10 +22,16 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(rootDir, 'web-client')));
+app.use(express.static(path.join(rootDir, 'public')));
+app.use(dump);
+app.use(protagonist);
+
 
 app.use('/', index);
 app.use('/users', users);
+app.use('/auth', auth);
+
+
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
