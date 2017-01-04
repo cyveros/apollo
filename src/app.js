@@ -5,11 +5,13 @@ import logger from 'morgan';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import helmet from 'helmet';
+import methodOverride from 'method-override';
 
 import RouterProvider from './router';
 
-let app = express();
-let rootDir = __dirname + '/..';
+const app = express();
+const rootDir = __dirname + '/..';
 
 // view engine setup
 app.set('views', path.join(rootDir, '/views'));
@@ -24,8 +26,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(rootDir, 'public')));
 
 app.use(cors());
-// app.use(dump);
-// app.use(protagonist);
+app.use(helmet());
+app.use(methodOverride());
 
 app.use('/', RouterProvider);
 
