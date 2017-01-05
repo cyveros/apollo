@@ -8,7 +8,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import methodOverride from 'method-override';
 
+import config from './config';
 import RouterProvider from './router';
+import mongoose from 'mongoose';
 
 const app = express();
 const rootDir = __dirname + '/..';
@@ -30,6 +32,13 @@ app.use(helmet());
 app.use(methodOverride());
 
 app.use('/', RouterProvider);
+
+mongoose.Promise = global.Promise;
+
+mongoose.connect(config.db, { server: { socketOptions: { keepAlive: 1 } } });
+mongoose.connection.on('error', () => {
+  throw new Error(`unable to connect to database: ${config.db}`);
+});
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

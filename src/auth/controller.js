@@ -1,6 +1,7 @@
 // /src/auth/controller.js
 import jwt from 'jsonwebtoken';
 import HTTPStatus from 'http-status';
+import config from '../config';
 
 const user = {
 	username: 'react',
@@ -21,8 +22,8 @@ class Controller
 		// }
 
 		const token = jwt.sign({
-			username: user.username
-		}, '123456789');
+			email: req.body.email
+		}, config.jwtSecret);
 
 		res.json({token, username: user.username});
 	}
