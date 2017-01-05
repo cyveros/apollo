@@ -5,7 +5,8 @@ class Controller
 	static getHealth(req, res, next)
 	{
 		res.json({
-			health: 'OK'
+			health: 'OK',
+			timestamps: Date.now
 		});
 	}
 }
