@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "gulp dev",
-    "prestart": "gulp build"
+    "postinstall": "./node_modules/gulp/bin/gulp.js build",
+    "start": "node bin/www"
   },
   "dependencies": {
     "body-parser": "~1.15.2",
