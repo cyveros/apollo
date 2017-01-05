@@ -6,7 +6,7 @@ class Controller
 	{
 		res.json({
 			health: 'OK',
-			timestamps: Date.now
+			timestamps: Date.now()
 		});
 	}
 }
