@@ -11,6 +11,7 @@ import methodOverride from 'method-override';
 import config from './config';
 import RouterProvider from './router';
 import mongoose from 'mongoose';
+import Sequelize from 'sequelize';
 
 const app = express();
 const rootDir = __dirname + '/..';
@@ -30,6 +31,23 @@ app.use(express.static(path.join(rootDir, 'public')));
 app.use(cors());
 app.use(helmet());
 app.use(methodOverride());
+
+const sql = new Sequelize(config.SQLDB, {
+  pool: {
+    max: 5,
+    min: 0,
+    idle: 10000
+  }
+});
+
+sql
+  .authenticate()
+  .then(() => {
+    console.log('connection success');
+  })
+  .catch(err => {
+    console.log('unable to conncet pg', err);
+  });
 
 app.use('/', RouterProvider);
 
