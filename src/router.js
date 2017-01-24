@@ -4,6 +4,7 @@ import { Router } from 'express';
 import AuthRouter from './auth/router';
 import UserRouter from './user/router';
 import HealthRouter from './health/router';
+import ReceptionRouter from './reception/router';
 
 const router = Router();
 
