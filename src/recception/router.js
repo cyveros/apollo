@@ -6,6 +6,6 @@ import Controller from './controller';
 const router = Router();
 
 router.route('/reception')
-	.get(Controller.getReceived);
+	.post(Controller.postReceived);
 
 export default router;

@@ -2,12 +2,12 @@
 
 class Controller
 {
-	static getReceived(req, res, next)
+	static postReceived(req, res, next)
 	{
 		res.json({
-			health: 'OK',
+			status: 'OK',
 			timestamps: Date.now(),
-			req: req
+			req: req.params
 		});
 	}
 }
