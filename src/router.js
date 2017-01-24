@@ -10,5 +10,6 @@ const router = Router();
 router.use(AuthRouter);
 router.use(UserRouter);
 router.use(HealthRouter);
+router.use(ReceptionRouter);
 
 export default router;
