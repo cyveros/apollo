@@ -1,8 +1,10 @@
 // /src/health/endpoint/web.js
+//
+import Controller from './../../support/controller';
 
-class Web
+class Web extends Controller
 {
-	static getHealth(req, res, next)
+	getHealth(req, res, next)
 	{
 		res.json({
 			health: 'OK',

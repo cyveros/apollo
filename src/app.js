@@ -10,7 +10,6 @@ import methodOverride from 'method-override';
 
 import config from './config';
 import RouterProvider from './router';
-import mongoose from 'mongoose';
 import db from './support/db';
 
 const app = express();
@@ -33,15 +32,9 @@ app.use(helmet());
 app.use(methodOverride());
 
 app.set('db', db);
+app.set('flag', 123);
 
-app.use('/', RouterProvider);
-
-mongoose.Promise = global.Promise;
-
-mongoose.connect(config.db, { server: { socketOptions: { keepAlive: 1 } } });
-mongoose.connection.on('error', () => {
-  throw new Error(`unable to connect to database: ${config.db}`);
-});
+app.use('/', RouterProvider(app));
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
