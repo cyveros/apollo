@@ -21,6 +21,7 @@
     "eslint": "^3.12.2",
     "express": "~4.14.0",
     "express-jwt": "^5.1.0",
+    "express-list-routes": "^0.1.4",
     "express-validation": "^1.0.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
