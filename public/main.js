@@ -25,28 +25,39 @@ Vue.component('ResultBody', {
 Vue.component('ResultStatsButton', {
     template: `
 		<div class="row">
-			<div class="col-lg-4">
+			<div class="col-md-3">
 				<div class="btn-group btn-group-xs" role="group">
 					<button class="btn btn-default" v-on:click="retrieve"><i class="glyphicon glyphicon-refresh"></i></button>
 				</div>
 			</div>
-			<div class="col-lg-4">
+			<div class="col-md-5">
 				<div class="btn-group btn-group-justified btn-group-xs" role="group">
-					<a class="btn btn-default" v-on:click="presence('fourseq')" v-bind:class="{active: filters.fourseq}">4-seq</a>
-					<a class="btn btn-default" v-on:click="presence('threeplusone')" v-bind:class="{active: filters.threeplusone}">3 + 1</a>
-					<a class="btn btn-default">2 + 2</a>
+					<a class="btn btn-default" title="5, 6, 7, 8" v-on:click="presence('fourseq')" v-bind:class="{active: filters.fourseq}">4-Seq</a>
+					<a class="btn btn-default" title="5, 6, 7,[jump,] 9" v-on:click="presence('threeplusone')" v-bind:class="{active: filters.threeplusone}">3 N 1</a>
+					<a class="btn btn-default" title="5, 6,[jump,] 8, 9" v-on:click="presence('twoplustwo')" v-bind:class="{active: filters.twoplustwo}">2 N 2</a>
+					<a class="btn btn-default" title="5, 7, 9,[jump,] 12" v-on:click="presence('threescatterplusone')" v-bind:class="{active: filters.threescatterplusone}">3S N 1</a>
 				</div>
-				
 			</div>
-			<div class="col-lg-4 text-right">
-				{{ stats.occurrence }} / {{ stats.total }} - {{ stats.ratio * 100 + ' %' }}
+			<div class="col-md-2">
+				<div class="btn-group btn-group-xs" role="group">
+					<a class="btn btn-default" v-on:click="alterJump('+')"><i class="glyphicon glyphicon-plus-sign"></i></a>
+					<a class="btn btn-default" disabled>Jump: {{ jump }}</a>
+					<a class="btn btn-default" v-on:click="alterJump('-')"><i class="glyphicon glyphicon-minus-sign"></i></a>
+					<a class="btn btn-default" v-on:click="alterJump('reset')">reset</a>
+				</div>
+			</div>
+			<div class="col-md-2 text-right">
+				{{ stats.occurrence }} / {{ stats.total }} - {{ (stats.ratio * 100).toFixed(2) + ' %' }}
 			</div>
 		</div>
 	`,
-    props: ['stats', 'filters'],
+    props: ['stats', 'filters', 'jump'],
     methods: {
         presence: function(filter) {
             this.$emit('presence', {toggle: filter});
+        },
+        alterJump: function(action) {
+        	this.$emit('jump', {value: (action == 'reset' ? 1 : action)});
         },
         retrieve: function() {
             this.$emit('retrieve');
@@ -63,7 +74,9 @@ const app = new Vue({
 				<ResultStatsButton 
 					v-bind:stats="stats" 
 					v-bind:filters="filters" 
+					v-bind:jump="jump"
 					v-on:presence="presence" 
+					v-on:jump="alterJump"
 					v-on:retrieve="buttonid = 0;retrieveResults();">
 				</ResultStatsButton>
 			</div>
@@ -82,8 +95,10 @@ const app = new Vue({
         filters: {
             fourseq: false,
             threeplusone: false,
-            twoplustwo: false
-        }
+            twoplustwo: false,
+            threescatterplusone: false
+        },
+        jump: 1
     },
     computed: {
         header: function() {
@@ -98,6 +113,14 @@ const app = new Vue({
 
             if (this.filters.threeplusone) {
             	rfs.push('presence31');
+            }
+
+            if (this.filters.twoplustwo) {
+            	rfs.push('presence22');
+            }
+
+            if (this.filters.threescatterplusone) {
+            	rfs.push('presence3scatter1');
             }
 
             return this.applyResultFilters(rfs);
@@ -163,6 +186,17 @@ const app = new Vue({
 
             return stats;
         },
+        alterJump: function(change) {
+			if (change.value == 1) {
+				this.jump = 1;
+
+				return;
+			} 
+
+        	if ((this.jump += (change.value == '+' ? 1 : -1)) < 0) {
+        		this.jump = 0;
+        	}
+        },
         presence: function(filter) {
         	this.filters[filter.toggle] = !this.filters[filter.toggle];
         },
@@ -176,10 +210,28 @@ const app = new Vue({
             return false;
     	},
     	presence31: function(numbers) {
-            for (let i = 0; i < numbers.length - 4; i++) {
-            	if ((numbers[i] && !numbers[i + 1] && this.assertTrue(numbers, i + 2, i + 4))
-            		|| (this.assertTrue(numbers, i, i + 2) && !numbers[i + 3] && numbers[i + 4])
+            for (let i = 0; i < numbers.length - 3 - this.jump; i++) {
+            	if ((numbers[i] && this.assertTrue(numbers, i + 1 + this.jump, i + 3 + this.jump))
+            		|| (this.assertTrue(numbers, i, i + 2) && numbers[i + 3 + this.jump])
             	) {
+            		return true;
+            	}
+            }
+
+            return false;
+    	},
+    	presence22: function(numbers) {
+            for (let i = 0; i < numbers.length - 3 - this.jump; i++) {
+            	if (this.assertTrue(numbers, i, i + 1) && this.assertTrue(numbers, i + 2 + this.jump, i + 3 + this.jump)) {
+            		return true;
+            	}
+            }
+
+            return false;
+    	},
+    	presence3scatter1: function(numbers) {
+    		for (let i = 0; i < numbers.length - 6 - this.jump; i++) {
+            	if (numbers[i] && numbers[i + 2] && numbers[i + 4] && numbers[i + 6 + this.jump]) {
             		return true;
             	}
             }
