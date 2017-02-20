@@ -1,6 +1,5 @@
-
 Vue.component('ResultHeader', {
-	template: `
+    template: `
 		<thead>
 			<tr>
 				<td></td>
@@ -8,11 +7,11 @@ Vue.component('ResultHeader', {
 			</tr>
 		</thead>
 	`,
-	props: ['header']
+    props: ['header']
 });
 
 Vue.component('ResultBody', {
-	template: `
+    template: `
 		<tbody>
 			<tr v-for="result in results" v-bind:class="{'bg-warning': result.highlight}">
 				<td><small>{{ result.date }}</small></td>
@@ -20,11 +19,11 @@ Vue.component('ResultBody', {
 			</tr>
 		</tbody>
 	`,
-	props: ['results']
+    props: ['results']
 });
 
 Vue.component('ResultStatsButton', {
-	template: `
+    template: `
 		<div class="row">
 			<div class="col-lg-4">
 				<div class="btn-group btn-group-xs" role="group">
@@ -33,45 +32,38 @@ Vue.component('ResultStatsButton', {
 			</div>
 			<div class="col-lg-4">
 				<div class="btn-group btn-group-justified btn-group-xs" role="group">
-					<a class="btn btn-default" v-on:click="compute4seq" v-bind:class="{active: filters.fourseq}">4-seq</a>
-					<a class="btn btn-default">3 + 1</a>
+					<a class="btn btn-default" v-on:click="presence('fourseq')" v-bind:class="{active: filters.fourseq}">4-seq</a>
+					<a class="btn btn-default" v-on:click="presence('threeplusone')" v-bind:class="{active: filters.threeplusone}">3 + 1</a>
 					<a class="btn btn-default">2 + 2</a>
 				</div>
 				
 			</div>
 			<div class="col-lg-4 text-right">
-				{{ stats * 100 + ' %' }}
+				{{ stats.occurrence }} / {{ stats.total }} - {{ stats.ratio * 100 + ' %' }}
 			</div>
 		</div>
 	`,
-	props: ['stats', 'filters'],
-	data: function() {
-		return {
-			buttonid: 0
-		};
-	},
-	methods: {
-		compute4seq: function() {
-			this.buttonid = 1;
-			this.$emit('compute4seq');
-		},
-		retrieve: function() {
-			this.buttonid = 0;
-			this.$emit('retrieve');
-		}
-	}
+    props: ['stats', 'filters'],
+    methods: {
+        presence: function(filter) {
+            this.$emit('presence', {toggle: filter});
+        },
+        retrieve: function() {
+            this.$emit('retrieve');
+        }
+    }
 });
 
 const app = new Vue({
-	el: '#banco',
-	template: `
+    el: '#banco',
+    template: `
 	<div>
 		<div class="panel">
 			<div class="panel-heading">
 				<ResultStatsButton 
 					v-bind:stats="stats" 
 					v-bind:filters="filters" 
-					v-on:compute4seq="filters.fourseq = true;" 
+					v-on:presence="presence" 
 					v-on:retrieve="buttonid = 0;retrieveResults();">
 				</ResultStatsButton>
 			</div>
@@ -84,88 +76,128 @@ const app = new Vue({
 		</div>
 	</div>
 	`,
-	data: {
-		results: [],
-		buttonid: 0,
-		filters: {
-			fourseq: false,
-			threeplusone: false,
-			twoplustwo: false
-		}
-	},
-	computed: {
-		header: function() {
-			return this.emptyArray(70, false);
-		},
-		stats: function() {
-			if (this.filters.fourseq) {
-				return this.count4seq();
-			}
+    data: {
+        results: [],
+        buttonid: 0,
+        filters: {
+            fourseq: false,
+            threeplusone: false,
+            twoplustwo: false
+        }
+    },
+    computed: {
+        header: function() {
+            return this.emptyArray(70, false);
+        },
+        stats: function() {
+        	let rfs = [];
 
-			return 0;
-		}
-	},
-	mounted: function() {
-		this.retrieveResults();
-	},
-	methods: {
-		retrieveResults: function() {
-			let _this = this;
+            if (this.filters.fourseq) {
+                rfs.push('presence4seq');
+            }
 
-			axios.get('/reception').then(function(response){
-				_this.results = _this.processResults(response.data);
-			});
-		},
-		processResults: function(results) {
+            if (this.filters.threeplusone) {
+            	rfs.push('presence31');
+            }
 
-			for (let index in results) {
-				let numbers = this.emptyArray(70, false);
+            return this.applyResultFilters(rfs);
+        }
+    },
+    mounted: function() {
+        this.retrieveResults();
+    },
+    methods: {
+        retrieveResults: function() {
+            let _this = this;
 
-				for (let number of results[index].number) {
-					numbers[number - 1] = true;
-				}
+            axios.get('/reception').then(function(response) {
+                _this.results = _this.processResults(response.data);
+            });
+        },
+        processResults: function(results) {
 
-				results[index].number = numbers;
-				results[index].highlight = false;
-			} 
+            for (let index in results) {
+                let numbers = this.emptyArray(70, false);
 
-			return results;
-		},
-		emptyArray: function(size, fill) {
-			let numbers = [];
+                for (let number of results[index].number) {
+                    numbers[number - 1] = true;
+                }
 
-			for (let i = 1; i <= size; i++) {
-				numbers[i] = fill;
-			}
+                results[index].number = numbers;
+                results[index].highlight = false;
+            }
 
-			return numbers;
+            return results;
+        },
+        emptyArray: function(size, fill) {
+            let numbers = [];
 
-		},
-		count4seq: function() {
-			let total = this.results.length;
-			let occurrence = 0;
+            for (let i = 1; i <= size; i++) {
+                numbers[i] = fill;
+            }
 
-			for (let index in this.results) {
-				let numbers = this.results[index].number;
-				let flag = 0;
+            return numbers;
+        },
+        applyResultFilters(rfs) {
+        	let stats = {
+        		occurrence: 0,
+        		total: this.results.length,
+        		ratio: 0
+        	};
 
-				for (let i = 0; i < numbers.length; i++) {
-					if (!numbers[i]) {
-						flag = 0;
+            for (let index in this.results) {
+            	let result = this.results[index];
+                let numbers = result.number;
 
-						continue;
-					}
+                result.highlight = false;
 
-					++flag;
+                for (let rf of rfs) {
+                	if (this[rf](result.number)) {
+                		stats.occurrence++;
+                		result.highlight = true;
+                	}
+                }
+            }
 
-					if (flag == 4) {
-						occurrence++;
-						this.results[index].highlight = true;
-					}
-				}
-			}
+            stats.ratio = stats.occurrence / stats.total;
 
-			return occurrence / total;
-		}
-	}
+            return stats;
+        },
+        presence: function(filter) {
+        	this.filters[filter.toggle] = !this.filters[filter.toggle];
+        },
+    	presence4seq: function(numbers) {
+            for (let i = 0; i < numbers.length - 4; i++) {
+            	if (this.assertTrue(numbers, i, i + 3)) {
+            		return true;
+            	}
+            }
+
+            return false;
+    	},
+    	presence31: function(numbers) {
+            for (let i = 0; i < numbers.length - 4; i++) {
+            	if ((numbers[i] && !numbers[i + 1] && this.assertTrue(numbers, i + 2, i + 4))
+            		|| (this.assertTrue(numbers, i, i + 2) && !numbers[i + 3] && numbers[i + 4])
+            	) {
+            		return true;
+            	}
+            }
+
+            return false;
+    	},
+    	assertTrue(numbers, low, high) {
+    		let assertion = true;
+
+    		for (let i = low; i <= high; i++) {
+    			assertion = assertion && numbers[i];
+
+    			if (!assertion) {
+    				return false;
+    			}
+    		}
+
+    		return true;
+    	}
+    }
 });
