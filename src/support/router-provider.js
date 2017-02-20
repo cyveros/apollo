@@ -6,10 +6,15 @@ class RouterProvider
 		this.router = router;
 		this.mountPoint = '/';
 		this.controllerMap = new Map();
+		this.modelMap = new Map();
 	}
 
-	name(name) {
-		this.name = name;
+	model(name, clazz) {
+		if (!this.modelMap.has(name)) {
+			this.modelMap.set(name, clazz);
+		}
+
+		return this;
 	}
 
 	register(method, cb) {
@@ -26,12 +31,20 @@ class RouterProvider
 
 	provide() {
 		let router = this.router.route(this.mountPoint);
-		let app = this.app;
 
+		// link controller
 		for (let [method, {controller, action}] of this.controllerMap) {
 			controller.application(this.app);
-			router[method](controller[action]);
+			router[method](controller[action].bind(controller));
 		}
+
+		// link model
+		for (let [name, clazz] of this.modelMap) {
+			if (!this.app.get(name)) {
+				this.app.set(name, clazz);
+			}
+		}
+
 
 		return this.router;
 	}

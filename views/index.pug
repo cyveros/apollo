@@ -1,8 +1,12 @@
 extends layout
 
 block content
-    div(class='container')
+    div(class='container-fluid')
         div(class='row')
             div(class='col-lg-12')
-                h1= title
-                h3 Welcome to #{title}
+                div(id='banco')
+    
+    script(type='text/javascript', src='https://unpkg.com/vue/dist/vue.js')
+    script(src='https://unpkg.com/axios/dist/axios.min.js')
+    script(type='text/javascript', src='/main.js')
+               
