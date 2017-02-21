@@ -234,6 +234,13 @@ const app = new Vue({
             return false;
         },
         presence31: function(numbers) {
+        	let definition = {
+        		base: 4,
+        		index:[0],
+        		jump: [[1, 3]],
+        		reverse: true
+        	};
+
             for (let i = 0; i < 67 - this.jump; i++) {
                 let left = numbers[i] && this.assertTrue(numbers, i + 1 + this.jump, i + 3 + this.jump) && this.order != 'right';
                 let right = this.assertTrue(numbers, i, i + 2) && numbers[i + 3 + this.jump] && this.order != 'left';
@@ -254,6 +261,13 @@ const app = new Vue({
             return false;
         },
         presence22: function(numbers) {
+        	let definition = {
+        		base: 4,
+        		index: {
+        			normal: [[0, 1]],
+        			jump: [[2, 3]]
+        		}
+        	};
             for (let i = 0; i < 67 - this.jump; i++) {
                 if (this.assertTrue(numbers, i, i + 1) && this.assertTrue(numbers, i + 2 + this.jump, i + 3 + this.jump)) {
                     return true;
