@@ -8,7 +8,9 @@ class Web extends Controller
 {
 	getReception(req, res, next)
 	{
-		request('http://diffusion.loto-quebec.com/sw3/res/asp/index.asp?l=1&pRequest=11&cProduit=6&pAnnee=2017', function(err, response, body) {
+		let year = req.query.year || 2017;
+
+		request('http://diffusion.loto-quebec.com/sw3/res/asp/index.asp?l=1&pRequest=11&cProduit=6&pAnnee=' + year, function(err, response, body) {
 			if (err) {
 				return next(err);
 			}
