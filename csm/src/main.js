@@ -1,97 +1,16 @@
-Vue.component('ResultHeader', {
-    template: `
-		<thead>
-			<tr>
-				<td></td>
-				<td><span v-for="(value, index) in ruler" v-bind:title="index + 1">&nbsp;{{ (index + 1) % 5 == 0 ? '■' : '□' }}</span></td>
-			</tr>
-		</thead>
-	`,
-    props: ['size', 'fill'],
-    computed: {
-        ruler: function() {
-            return Array(parseInt(this.size || 70)).fill(this.fill || false);
-        }
-    }
-});
+import Vue from 'vue';
+import App from './App.vue';
+import ResultStatsButton from './result/stats-button.vue';
+import ResultHeader from './result/header.vue';
+import ResultBody from './result/body.vue';
+import Definition from './presence/definition';
+import axios from 'axios';
 
-Vue.component('ResultBody', {
-    template: `
-		<tbody>
-			<tr v-for="result in results" v-bind:class="{'bg-warning': result.highlight}">
-				<td><small>{{ result.date }}</small></td>
-				<td><span v-for="(num, index) in result.numbers" v-bind:class="{'text-muted': !num}" v-bind:title="index + 1">&nbsp;{{ num ? '■' : '□' }}</span></td>
-			</tr>
-		</tbody>
-	`,
-    props: ['results']
-});
+Vue.component('ResultStatsButton', ResultStatsButton);
+Vue.component('ResultHeader', ResultHeader);
+Vue.component('ResultBody', ResultBody);
 
-Vue.component('ResultStatsButton', {
-    template: `
-		<div class="row">
-            <div class="col-sm-2">
-                <span class="btn-group btn-group-xs" role="group">
-                    <a class="btn btn-default" v-on:click="alter('year', 2016)" v-bind:class="{active: year == 2016}">2016</a>
-                    <a class="btn btn-default" v-on:click="alter('year', 2017)" v-bind:class="{active: year == 2017}">2017</a>
-                </span>
-                &nbsp;
-                <span class="btn-group btn-group-xs" role="group">
-                    <a class="btn btn-default" v-on:click="alter('year', 2016)" v-bind:class="{active: year == 2016}"><i class="glyphicon glyphicon-th-large"></i></a>
-                    <a class="btn btn-default" v-on:click="alter('year', 2017)" v-bind:class="{active: year == 2017}"><i class="glyphicon glyphicon-th-list"></i></a>
-                </span>
-            </div>
-			<div class="col-sm-7">
-                <span class="btn-group btn-group-xs" role="group">
-                    <a class="btn btn-default" v-on:click="alter('order', 'left')" v-bind:class="{active: order == 'left'}"><i class="glyphicon glyphicon-arrow-left"></i></a>
-                    <a class="btn btn-default" v-on:click="alter('order', 'any')" v-bind:class="{active: order == 'any'}">any</a>
-                    <a class="btn btn-default" v-on:click="alter('order', 'right')" v-bind:class="{active: order == 'right'}"><i class="glyphicon glyphicon-arrow-right"></i></a>
-                </span>
-                &nbsp;
-				<span class="btn-group btn-group-xs" role="group">
-					<a class="btn btn-default" title="5, 6, 7, 8" v-on:click="alter('presence', 'fourseq')" v-bind:class="{active: filters.fourseq}">4-Seq</a>
-					<a class="btn btn-default" title="5, 6, 7,[jump,] 9" v-on:click="alter('presence', 'threeplusone')" v-bind:class="{active: filters.threeplusone}">3-Seq N 1</a>
-					<a class="btn btn-default" title="5, 6,[jump,] 8, 9" v-on:click="alter('presence', 'twoplustwo')" v-bind:class="{active: filters.twoplustwo}">2-Seq N 2-Seq</a>
-					<a class="btn btn-default" title="5, 7, 9,[jump,] 12" v-on:click="alter('presence', 'threescatterplusone')" v-bind:class="{active: filters.threescatterplusone}">3-JSeq N 1</a>
-				</span>
-                &nbsp;
-                <span class="btn-group btn-group-xs" role="group">
-                    <a class="btn btn-default" v-on:click="alter('jump', '+')"><i class="glyphicon glyphicon-plus-sign"></i></a>
-                    <a class="btn btn-default" disabled>Jump: {{ jump }}</a>
-                    <a class="btn btn-default" v-on:click="alter('jump', '-')"><i class="glyphicon glyphicon-minus-sign"></i></a>
-                    <a class="btn btn-default" v-on:click="alter('jump', 'reset')">reset</a>
-                </span>
-			</div>
-			<div class="col-sm-3 text-right">
-				<span>{{ stats.occurrence }} / {{ stats.total }} - {{ (stats.ratio * 100).toFixed(2) }} % - {{ (stats.risk * 100).toFixed(2) }} %</span>
-			</div>
-		</div>
-	`,
-    props: ['stats', 'filters', 'jump', 'order', 'year'],
-    methods: {
-        presence: function(filter) {
-            this.$emit('presence', {
-                toggle: filter
-            });
-        },
-        alterJump: function(action) {
-            this.$emit('jump', {
-                value: (action == 'reset' ? 1 : action)
-            });
-        },
-        alter: function(type, value) {
-            this.$emit('alter', {
-                value: value,
-                type: type
-            });
-        },
-        retrieve: function() {
-            this.$emit('retrieve');
-        }
-    }
-});
-
-const app = new Vue({
+new Vue({
     el: '#banco',
     template: `
 	<div>
@@ -217,22 +136,23 @@ const app = new Vue({
                     break;
             }
         },
-        presence4seq: function(numbers) {
-        	let definition = {
-        		base: 4,
-        		index: {
-        			normal: [[0, 3]],
-        			jump: []
-        		}
-        	};
-
-            for (let i = 0; i < numbers.length - 3; i++) {
+        resolvePresence(definition, numbers) {
+        	for (let i = 0; i < numbers.length - definition.base + 1; i++) {
                 if (numbers.slice(i, i + 4).reduce((matched, presence) => matched && presence)) {
                     return true;
                 }
             }
+        },
+        presence4seq: function(numbers) {
+        	let definition = new Definition({
+        		base: 4,
+        		index: {
+        			normal: [[0, 3]],
+        			gap: []
+        		}
+        	});
 
-            return false;
+            return definition.match(numbers);
         },
         presence31: function(numbers) {
         	let definition = {

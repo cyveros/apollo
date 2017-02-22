@@ -5,6 +5,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const nodemon = require('gulp-nodemon');
 const livereload = require('gulp-livereload');
 const eslint = require('gulp-eslint');
+const webpack = require('webpack-stream');
 
 gulp.task('lint', () => {
 	return gulp.src('src/**/*.js')
@@ -21,6 +22,12 @@ gulp.task('clean:server', () => {
 	]);
 });
 
+gulp.task('clean:csm', () => {
+	return del([
+		'public/dist/**/*'
+	]);
+});
+
 gulp.task('build:server', ['clean:server'], () => {
 	return gulp.src("src/**/*.js")
 		.pipe(sourcemaps.init())
@@ -29,6 +36,12 @@ gulp.task('build:server', ['clean:server'], () => {
 		}))
 		.pipe(sourcemaps.write('.'))
 		.pipe(gulp.dest('dist'));
+});
+
+gulp.task('build:csm', ['clean:csm'], () => {
+	return gulp.src('csm/src/main.js')
+		.pipe(webpack(require('./webpack.config.js')))
+		.pipe(gulp.dest('public/dist/'));
 });
 
 gulp.task('build', ['build:server']);
@@ -42,7 +55,7 @@ gulp.task('serve', ['build'], () => {
 gulp.task('watch', () => {
 	livereload.listen();
 
-	gulp.watch('src/**/*.js', ['build']);
+	gulp.watch(['src/**/*.js'], ['build']);
 });
 
 gulp.task('dev', ['serve', 'watch']);
