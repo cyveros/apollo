@@ -3,11 +3,16 @@ Vue.component('ResultHeader', {
 		<thead>
 			<tr>
 				<td></td>
-				<td><span v-for="(caption, index) in header" v-bind:title="index + 1">&nbsp;{{ (index + 1) % 5 == 0 ? '■' : '□' }}</span></td>
+				<td><span v-for="(value, index) in ruler" v-bind:title="index + 1">&nbsp;{{ (index + 1) % 5 == 0 ? '■' : '□' }}</span></td>
 			</tr>
 		</thead>
 	`,
-    props: ['header']
+    props: ['size', 'fill'],
+    computed: {
+        ruler: function() {
+            return Array(parseInt(this.size || 70)).fill(this.fill || false);
+        }
+    }
 });
 
 Vue.component('ResultBody', {
@@ -15,7 +20,7 @@ Vue.component('ResultBody', {
 		<tbody>
 			<tr v-for="result in results" v-bind:class="{'bg-warning': result.highlight}">
 				<td><small>{{ result.date }}</small></td>
-				<td><span v-for="(num, index) in result.number" v-bind:class="{'text-muted': !num}" v-bind:title="index + 1">&nbsp;{{ num ? '■' : '□' }}</span></td>
+				<td><span v-for="(num, index) in result.numbers" v-bind:class="{'text-muted': !num}" v-bind:title="index + 1">&nbsp;{{ num ? '■' : '□' }}</span></td>
 			</tr>
 		</tbody>
 	`,
@@ -96,8 +101,8 @@ const app = new Vue({
                     v-on:alter="alter">
                 </ResultStatsButton>
 				<table class="table table-condensed">
-					<ResultHeader v-bind:header="header"></ResultHeader>
-					<ResultBody v-bind:results="results"></ResultBody>
+					<thead is="ResultHeader" v-bind:size="70" v-bind:fill="false"></thead>
+					<tbody is="ResultBody" v-bind:results="results"></tbody>
 				</table>
 			</div>
 		</div>
@@ -116,9 +121,6 @@ const app = new Vue({
         year: 2017
     },
     computed: {
-        header: function() {
-            return this.emptyArray(70, false);
-        },
         stats: function() {
             let rfs = [];
 
@@ -145,36 +147,23 @@ const app = new Vue({
         this.retrieveResults();
     },
     methods: {
-        retrieveResults: function() {
+        retrieveResults() {
             let _this = this;
 
-            axios.get('/reception?year=' + this.year).then(function(response) {
-                _this.results = _this.processResults(response.data);
+            axios.get('/reception?year=' + this.year).then(response => {
+                _this.results = response.data.map(result => {
+                    let numbers = Array(70).fill(false);
+
+                    for (let number of result.number) {
+                        numbers[number - 1] = true;
+                    }
+
+                    result.numbers = numbers;
+                    result.highlight = false;
+
+                    return result;
+                });
             });
-        },
-        processResults: function(results) {
-
-            for (let index in results) {
-                let numbers = this.emptyArray(70, false);
-
-                for (let number of results[index].number) {
-                    numbers[number - 1] = true;
-                }
-
-                results[index].number = numbers;
-                results[index].highlight = false;
-            }
-
-            return results;
-        },
-        emptyArray: function(size, fill) {
-            let numbers = [];
-
-            for (let i = 0; i < size; i++) {
-                numbers[i] = fill;
-            }
-
-            return numbers;
         },
         applyResultFilters(rfs) {
             let stats = {
@@ -186,12 +175,11 @@ const app = new Vue({
 
             for (let index in this.results) {
                 let result = this.results[index];
-                let numbers = result.number;
 
                 result.highlight = false;
 
                 for (let rf of rfs) {
-                    if (this[rf](result.number)) {
+                    if (this[rf](result.numbers)) {
                         stats.occurrence++;
                         result.highlight = true;
                     }
@@ -203,7 +191,7 @@ const app = new Vue({
 
             return stats;
         },
-        alter: function(change) {
+        alter(change) {
             switch (change.type) {
                 case 'year':
                     this.year = change.value;
@@ -225,8 +213,8 @@ const app = new Vue({
             }
         },
         presence4seq: function(numbers) {
-            for (let i = 0; i < numbers.length - 4; i++) {
-                if (this.assertTrue(numbers, i, i + 3)) {
+            for (let i = 0; i < numbers.length - 3; i++) {
+                if (numbers.slice(i, i + 4).reduce((matched, presence) => matched && presence)) {
                     return true;
                 }
             }
