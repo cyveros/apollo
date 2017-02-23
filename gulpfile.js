@@ -39,7 +39,7 @@ gulp.task('build:server', ['clean:server'], () => {
 });
 
 gulp.task('build:csm', ['clean:csm'], () => {
-	return gulp.src('csm/src/main.js')
+	return gulp.src('csm/src/**/*')
 		.pipe(webpack(require('./webpack.config.js')))
 		.pipe(gulp.dest('public/dist/'));
 });

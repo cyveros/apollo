@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=production webpack --progress --hide-modules && node ./node_modules/gulp/bin/gulp dev",
-    "start": "node ./node_modules/gulp/bin/gulp serve"
+    "dev": "node ./node_modules/gulp/bin/gulp dev",
+    "start": "node ./node_modules/gulp/bin/gulp serve",
+    "build:csm": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
     "argon2": "^0.15.0",
