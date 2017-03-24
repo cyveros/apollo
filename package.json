@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "node ./node_modules/gulp/bin/gulp dev",
+    "dev": "node bin/www",
     "start": "node ./node_modules/gulp/bin/gulp serve",
-    "prepublish": "npm run build:csm",
-    "build:csm": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build:csm": "cross-env NODE_ENV=production webpack --progress --hide-modules",
+    "heroku-postbuild": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
     "argon2": "^0.15.0",
