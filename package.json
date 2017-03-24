@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "node ./node_modules/gulp/bin/gulp dev",
     "start": "node ./node_modules/gulp/bin/gulp serve",
+    "prepublish": "npm run build:csm",
     "build:csm": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
