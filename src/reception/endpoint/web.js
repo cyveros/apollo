@@ -10,14 +10,14 @@ class Web extends Controller
 	{
 		let year = req.query.year || 2017;
 
-		request('http://diffusion.loto-quebec.com/sw3/res/asp/index.asp?l=1&pRequest=11&cProduit=6&pAnnee=' + year, function(err, response, body) {
+		request('https://loteries.espacejeux.com/en/lotteries/banco?widget=resultats-anterieurs&noProduit=208&annee=' + year, function(err, response, body) {
 			if (err) {
 				return next(err);
 			}
 
 			let $ = cheerio.load(body);
 
-			let $rows = $('.stats_table_vie_banco tr');
+			let $rows = $('tr:not(.titre)');
 
 			let len = $rows.length;
 			let index = 1;
@@ -30,19 +30,19 @@ class Web extends Controller
 
 				let nums = [];
 
-				let numbers = $row.find('.stats_gagnants u').text() + '';
+				let $numbers = $row.find('.numerosGangnants span');
 
 				let key = 0;
 
-				while (key < numbers.length) {
-					nums.push(parseInt(numbers.charAt(key)+numbers.charAt(key+1)));
+				while (key < $numbers.length) {
+					nums.push(parseInt($numbers.eq(key).text()));
 
-					key+= 2;
+					key++;
 				}
 
 
 				banco.push({
-					date: $row.find('.stats_date').text(),
+					date: $row.find('.date').text(),
 					number: nums
 				});
 

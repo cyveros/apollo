@@ -10,7 +10,7 @@ import methodOverride from 'method-override';
 
 import config from './config';
 import RouterProvider from './router';
-import db from './support/db';
+// import db from './support/db';
 
 const app = express();
 const rootDir = __dirname + '/..';
@@ -31,7 +31,7 @@ app.use(cors());
 app.use(helmet());
 app.use(methodOverride());
 
-app.set('db', db);
+// app.set('db', db);
 app.set('flag', 123);
 
 app.use('/', RouterProvider(app));
