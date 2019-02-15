@@ -33,7 +33,7 @@
       </span>
     </div>
     <div class="col-sm-3 text-right">
-      <span>{{ stats.occurrence }} / {{ stats.total }} - {{ (stats.ratio * 100).toFixed(2) }} % - {{ (stats.risk * 100).toFixed(2) }} %</span>
+      <span title="occurrence - hit ratio - chance of lost">occurrence - hit ratio - chance of lost: {{ stats.occurrence }} / {{ stats.total }} - {{ (stats.ratio * 100).toFixed(2) }} % - {{ (stats.risk * 100).toFixed(2) }} %</span>
     </div>
   </div>
 </template>
