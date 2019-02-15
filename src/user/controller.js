@@ -3,7 +3,6 @@ import User from './models/user';
 import HTTPStatus from 'http-status';
 import UserModel from './models/user.seq';
 import Sequelize from 'sequelize';
-import argon2 from 'argon2';
 
 
 class Controller {
@@ -28,23 +27,6 @@ class Controller {
             if (result > 0) {
                 return next(new Error('User existed with email ' + req.body.email, HTTPStatus.CONFLICT));
             }
-
-            argon2.generateSalt(32).then(salt => {
-            	argon2.hash(req.body.password, salt).then(hash => {
-            		Users.create({
-		                email: req.body.email,
-		                password: hash,
-		                salt: salt
-		            }).then(function(user) {
-		                res.status(201).json({
-		                	email: user.email,
-		                	createdAt: user.createdAt
-		                });
-		            }).catch(Sequelize.ValidationError, function(err) {
-		                res.json(err);
-		            });
-            	});
-            });
         });
 
         // User.findOne({

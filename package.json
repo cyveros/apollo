@@ -8,8 +8,10 @@
     "build:csm": "cross-env NODE_ENV=production webpack --progress --hide-modules",
     "heroku-postbuild": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
+  "engines": {
+    "node": "6.9.1"
+  },
   "dependencies": {
-    "argon2": "^0.15.0",
     "axios": "^0.15.3",
     "babel-cli": "^6.18.0",
     "babel-core": "^6.21.0",
